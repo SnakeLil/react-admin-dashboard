@@ -1,0 +1,31 @@
+@import './reset.scss';
+@mixin mobile {
+    @media  (max-width: 850px) {
+        @content;
+    }
+}
+@mixin tablet {
+    @media (min-width: 850px) and (max-width: 1150px) {
+        @content;
+    }
+}
+@mixin desktop {
+    @media (min-width: 1150px) {
+        @content;
+    }
+}
+::-webkit-scrollbar {
+    
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: #888;
+}
+.app {
+    height: 100vh;
+    overflow: hidden;
+}
