@@ -14,9 +14,13 @@ import {
 import { useLocation } from 'react-router-dom'
 export default function Navbar() {
   const location = useLocation()
-  console.log(location)
-  const renderPath = ()=>{
-    
+
+  const renderPath = (path)=>{
+    return path.slice(1).split('/').map((item,index)=>{
+      return <BreadcrumbItem key={index}>
+      <BreadcrumbLink href={path} style={{ fontSize: '14px' }}>{item}</BreadcrumbLink>
+    </BreadcrumbItem>
+    })
   }
   return (
     <div className='navbar'>
@@ -26,17 +30,7 @@ export default function Navbar() {
 
         <Breadcrumb spacing='8px' separator={<ChevronRightIcon color='gray.500' />}>
           
-          <BreadcrumbItem>
-            <BreadcrumbLink href='#' style={{ fontSize: '14px' }}>Home</BreadcrumbLink>
-          </BreadcrumbItem>
-
-          <BreadcrumbItem>
-            <BreadcrumbLink href='#' style={{ fontSize: '14px' }}>About</BreadcrumbLink>
-          </BreadcrumbItem>
-
-          <BreadcrumbItem isCurrentPage>
-            <BreadcrumbLink href='#' style={{ fontSize: '14px' }}>Contact</BreadcrumbLink>
-          </BreadcrumbItem>
+          {renderPath(location.pathname)}
         </Breadcrumb>
       </div>
       <div className="right">
