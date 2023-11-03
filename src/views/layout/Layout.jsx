@@ -14,6 +14,9 @@ export default function Layout() {
   return (
     <div className="layout-container">
       <div className="layout-left">
+        <div className='title'>
+        <h1 style={{fontSize:'24px',fontWeight:'bold',letterSpacing:'0.2ch',marginBottom:'23px',color:'rgb(54, 54, 54)'}}>Lilsnak管理系统</h1>
+        </div>
         <div className="menu">
           <Leftbar />
         </div>

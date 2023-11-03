@@ -1,0 +1,20 @@
+.leftbar {
+    .menuItem {
+        height: 40px;
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        gap: 10px;
+
+    }
+
+    .subMenuItem {
+        display: flex;
+        flex-direction: column;
+        gap: 6x;
+    }
+    a:hover {
+        color:rgb(166, 166, 201)
+    }
+    
+}
