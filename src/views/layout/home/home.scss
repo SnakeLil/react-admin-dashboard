@@ -1,0 +1,13 @@
+.home {
+    .title {
+        font-size: 34px;
+        font-weight: bold;
+        text-shadow: 0 0 10px #a1a1a1;
+        color: white;
+        -webkit-box-reflect: below 2px linear-gradient(transparent, rgba(0, 0, 0, .5));
+        
+    }
+    img{
+        object-fit: cover;
+    }
+}

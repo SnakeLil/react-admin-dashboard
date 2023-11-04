@@ -65,15 +65,18 @@ export const router = createBrowserRouter([
     {
         path:'login',
         element:<Login/>,
+
     },
     {
         path:'*',
         element:<NotFound/>,
     }
   ]);
-export default function Router() {
+export default function Router({children}) {
   return (
     
-    <RouterProvider router={router} />
+    <RouterProvider router={router} >
+      {children}
+    </RouterProvider>
   )
 }

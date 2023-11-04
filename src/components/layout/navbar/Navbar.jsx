@@ -11,16 +11,27 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
 } from '@chakra-ui/react'
-import { useLocation } from 'react-router-dom'
-export default function Navbar() {
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { logout } from '../../../store/user/userSlice'
+export default function Navbar({user,logout:reqLogout}) {
   const location = useLocation()
-
+  const token = useSelector(state=>state.user.token)
+  const dispatch = useDispatch()
+  const navgate = useNavigate()
   const renderPath = (path)=>{
     return path.slice(1).split('/').map((item,index)=>{
       return <BreadcrumbItem key={index}>
       <BreadcrumbLink href={path} style={{ fontSize: '14px' }}>{item}</BreadcrumbLink>
     </BreadcrumbItem>
     })
+  }
+  const handleLogout = async ()=>{
+      let res = await reqLogout()
+      if(res.code === 200) {
+        dispatch(logout())
+        navgate('login',{replace:true})
+      }
   }
   return (
     <div className='navbar'>
@@ -35,15 +46,15 @@ export default function Navbar() {
       </div>
       <div className="right">
         <Stack direction='row' style={{ alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '18px' }}>username</span>
+          <span style={{ fontSize: '18px' }}>{user.name}</span>
           {/* 下拉菜单 */}
           <Menu>
-            <MenuButton transition='all 0.2s' borderRadius='md' _hover={{ bg: 'gray.400' }}>
-              <Avatar name='' size='sm' src='https://bit.ly/broken-link' />
+            <MenuButton transition='all 0.2s' borderRadius='md' _hover={{ bg: 'gray.100' }}>
+              <Avatar name='' size='sm' src={user.avatar} />
             </MenuButton>
             <MenuList>
               <MenuItem>个人中心</MenuItem>
-              <MenuItem>退出登录</MenuItem>
+              <MenuItem onClick={handleLogout}>退出登录</MenuItem>
             </MenuList>
           </Menu>
         </Stack>
