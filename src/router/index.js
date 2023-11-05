@@ -15,6 +15,11 @@ import Permission from '../views/layout/role/Permission';
 import NotFound from '../views/404/NotFound';
 import { BiHomeAlt2,BiUser,BiSolidUserDetail,BiLock,BiUserPin } from 'react-icons/bi'
 import { FiUsers } from 'react-icons/fi'
+import Brand from '../views/layout/product/brand/Brand'
+import Spu from '../views/layout/product/spu/Spu'
+import Sku from '../views/layout/product/sku/Sku'
+import {ProfileOutlined,BoldOutlined,PartitionOutlined,ReconciliationOutlined,TagsFilled} from '@ant-design/icons'
+import Attr from '../views/layout/product/attr/Attr';
 export const router = createBrowserRouter([
     {
       path: "/",
@@ -60,6 +65,37 @@ export const router = createBrowserRouter([
             }
           ]
         },
+        {
+          path:'/product',
+          name:'商品管理',
+          icon:ProfileOutlined,
+          children:[
+            {
+              name:'属性管理',
+              path:'/product/attr',
+              icon:TagsFilled,
+              element:<Attr/>
+            },
+            {
+              name:'品牌管理',
+              path:'/product/brand',
+              icon:BoldOutlined,
+              element:<Brand/>
+            },
+            {
+              name:'spu管理',
+              path:'/product/spu',
+              icon:PartitionOutlined,
+              element:<Spu/>
+            },
+            {
+              name:'sku管理',
+              path:'/product/sku',
+              icon:ReconciliationOutlined,
+              element:<Sku/>
+            }
+          ]
+        }
       ],
     },
     {
