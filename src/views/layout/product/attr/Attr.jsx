@@ -1,12 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState,  useEffect } from 'react'
 import './attr.scss'
-import { Card, Button, message, Table, Pagination, Form, Select, Tag, Modal, Input, Upload, Popconfirm } from 'antd';
-import { PlusOutlined, LoadingOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { useDispatch, useSelector } from 'react-redux';
+import { Card, Button, message, Table,  Form,  Tag,Input,  Popconfirm } from 'antd';
+import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons'
+import { useSelector } from 'react-redux';
 import Category from '../../../../components/category/Category';
-import { getAttrInfoList, deleteAttr } from '../../../../api/product/category';
+import { getAttrInfoList, deleteAttr, addOrUpdateAttr } from '../../../../api/product/category';
 import MySpin from '../../../../components/spin/MySpin';
-import FormItem from 'antd/es/form/FormItem';
 export default function Attr() {
     const [scene, setScene] = useState(false)
     // 属性列表
@@ -45,7 +44,7 @@ export default function Attr() {
             width: 150,
             render: (_, record) => (
                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                    <Button onClick={handleModifyAttr}>修改</Button>
+                    <Button onClick={() => { handleModifyAttr(record) }}>修改</Button>
                     <Popconfirm
                         description={`确定删除属性: ${record.attrName} 吗?`}
                         okText="确认"
@@ -69,10 +68,33 @@ export default function Attr() {
         },
         {
             title: '属性值',
-            dataIndex: 'attrValueName',
-            key: 'attrValueName',
+            dataIndex: 'valueName',
+            key: 'valueName',
             width: 250,
-            align: 'center'
+            align: 'center',
+            render:(value,record)=>{
+                return <div style={{width:'100%',height:'100%',display:'flex',justifyContent:'center'}}>
+                {record.flag?
+                <Input placeholder="请输入属性值" value={value} style={{width:"200px"}} autoFocus={true} 
+                onBlur={(e)=>{inputOnBlur(record)}}
+                onChange={(e)=> {setAttrValueList(pre=>pre.map(item=>{
+                    if(item.key === record.key) {
+                        item.valueName =e.target.value
+                        return item
+                    }else {
+                        return item
+                    }
+                })
+                   
+                //     {
+                //     pre[pre.length-1]={...pre[pre.length-1],valueName:e.target.value}
+                //     return [...pre]
+                // }
+                )}}/>
+                :
+                <span >{value}</span>}
+                </div>
+            }
         },
 
         {
@@ -82,9 +104,9 @@ export default function Attr() {
             width: 150,
             render: (_, record) => (
                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                    <Button>修改</Button>
+                    <Button onClick={()=>{handleAttrValueModify(record)}}>修改</Button>
                     <Popconfirm
-                        description={`确定删除属性: ${record.attrName} 吗?`}
+                        description={`确定删除属性值: ${record.valueName} 吗?`}
                         okText="确认"
                         cancelText="取消"
                         placement="left"
@@ -96,26 +118,33 @@ export default function Attr() {
             ),
         },
     ]
-    const [attrList, setAttr] = useState([])//属性列表
-    const [attrValueList, setAttrValue] = useState([]) //属性值列表
+    const [attrList, setAttrList] = useState([])//属性列表
+    const [attrValueList, setAttrValueList] = useState([]) //属性值列表
     const categoryStore = useSelector(state => state.category) //获取分类仓库
     const [spinning, setSpinning] = useState(false)
+    const [attr, setAttr] = useState({
+        id: '',
+        attrName: '',
+        categoryId: '',
+        categoryLevel: 3,
+        attrValueList: []
+    })
     // 发请求获取属性数据
     const getAttrList = async () => {
         setSpinning(true)
-        
-        try{
+
+        try {
             let res = await getAttrInfoList(categoryStore.category1Id, categoryStore.category2Id, categoryStore.category3Id)
             if (res.code === 200) {
                 setSpinning(false)
-                setAttr(res.data.map(item => {
+                setAttrList(res.data.map(item => {
                     return { ...item, key: item.id }
                 }))
             } else {
                 setSpinning(false)
                 console.log(res.message)
             }
-        }catch(err) {
+        } catch (err) {
             setSpinning(false)
             message.error('网络错误')
         }
@@ -129,17 +158,14 @@ export default function Attr() {
 
     // 点击添加属性
     const addAttrHandler = () => {
+        setAttr(pre=> {
+            return {id: '',attrName: '',categoryId: categoryStore.category3Id,categoryLevel: 3,attrValueList: []}
+        })
+        setAttrValueList([])
         // 显示添加/修改页
-        setScene(pre=>!pre)
-    }
-
-    // 图片上传前置守卫
-    const beforeUpload = () => {
-
-    }
-    // 图片上传change
-    const handleChange = () => {
-
+        setScene(pre => !pre)
+        
+        
     }
     // 点击确认删除属性
     const handleDelAttrOk = async (attr) => {
@@ -152,31 +178,109 @@ export default function Attr() {
         }
     }
     // 点击确认删除属性值
-    const handleDelAttrValueOk = (attrValue)=>{
-
+    const handleDelAttrValueOk = (attrValue) => {
+        console.log(attrValue)
+        setAttrValueList(pre=> pre.filter(item => item.id !== attrValue.id))
     }
     // 点击修改属性
-    const handleModifyAttr = (attr)=>{
-        setScene(pre=>!pre)
+    const handleModifyAttr = (record) => {
+        setAttr({id: '',attrName: '',categoryId: '',categoryLevel: 3,attrValueList: []})
+        setScene(pre => !pre)
+        setAttr(pre => { return Object.assign(pre, JSON.parse(JSON.stringify(record))) })
+        setAttrValueList(record.attrValueList.map(item=>{
+            return {...item,key:item.id}
+        }))
+
+
+    }
+    // 点击添加属性值按钮
+    const handleClickAddAttrValue =()=>{
+        setAttrValueList([...attrValueList,{id:'',key:Date.now(),attrId:'',valueName:'',flag:true}])
+    }
+
+    // 点击保存，添加/修改属性
+    const save = async ()=>{
+        setSpinning(true)
+        try {
+            let res = await addOrUpdateAttr({
+                ...attr,
+                attrValueList:attrValueList
+            })
+            if(res.code === 200) {
+                getAttrList()
+                setSpinning(false)
+                message.success(attr.id?'修改成功':'添加成功')
+                setScene(pre => !pre)
+            }else {
+                setSpinning(false)
+                message.error('保存失败')
+                
+            }
+        }catch(err) {
+            setSpinning(false)
+            message.error('网络超时！')
+        }
+
+    }
+    // 属性值失去焦点
+    const inputOnBlur = (value)=>{
+        console.log(value)
+        if(value.valueName.trim().length === 0) {
+            // 没有输入属性值，删除此行
+            setAttrValueList(pre=>pre.filter(item=>item.key!==value.key))
+            message.info('属性值不能为空')
+        }else {
+            // 有属性值，且不为空、
+            setAttrValueList(pre=>pre.map(item=>{
+                if(item.key === value.key) {
+                    item.flag = false
+                    return item
+                }else {
+                    return item
+                }
+            }))
+        }
+    }
+    // 点击修改属性值
+    const handleAttrValueModify = (value)=>{
+        setAttrValueList(pre=>pre.map(item=>{
+            if(item.key === value.key) {
+                item.flag = true
+                return item
+            }else {
+                return item
+            }
+           
+        }))
+    }
+    // 点击取消
+    const cancel = ()=>{
+        setAttr(pre=> {
+            return {id: '',attrName: '',categoryId: '',categoryLevel: 3,attrValueList: []}
+        })
+        setScene(pre => !pre) 
     }
     return (
         <div className='attr'>
             {/* 三级分类 */}
-            <Category />
+            <Category scene={scene}/>
             {/* 属性列表 */}
             <Card style={{ width: '100 %', marginTop: '30px' }}>
                 {scene ?
                     <div>
                         <Form size='large'>
                             <Form.Item label="属性名">
-                                <Input placeholder="请输入属性名" style={{width:'200px'}}/>
+                                <Input placeholder="请输入属性名" value={attr.attrName} style={{ width: '200px' }}
+                                 onChange={(e)=>{
+                                    setAttr((pre)=> {return {...pre,attrName:e.target.value}})
+                            }}/>
                             </Form.Item>
                         </Form>
-                        <Button icon={<PlusOutlined/>} >添加属性</Button>
-                        <Button  onClick={()=>{setScene(pre=>!pre)}} style={{marginLeft:'25px'}}>取消</Button>
-                        <Table style={{margin:'30px 0'}} columns={attrColumns} dataSource={attrValueList} bordered pagination={false} />
-                        <Button >保存</Button>
-                        <Button  onClick={()=>{setScene(pre=>!pre)}} style={{marginLeft:'25px'}}>取消</Button>
+                        <Button icon={<PlusOutlined />} disabled={attr.attrName.trim().length?false:true} onClick={handleClickAddAttrValue}>添加属性</Button>
+                        <Button onClick={ cancel} style={{ marginLeft: '25px' }}>取消</Button>
+                        <Table style={{ margin: '30px 0' }} columns={attrColumns} dataSource={attrValueList} bordered pagination={false} />
+                        <Button onClick={save} disabled={attr.attrName.trim().length?false:true}>保存</Button>
+                        <Button onClick={cancel} style={{ marginLeft: '25px' }}>取消</Button>
                     </div>
                     :
                     <>

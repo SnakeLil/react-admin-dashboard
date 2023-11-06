@@ -5,6 +5,7 @@ module.exports = function(app) {
     '/api',
     createProxyMiddleware({
       target: 'http://localhost:5000',
+      // target: 'http://sph-api.atguigu.cn',
       changeOrigin: true,
     })
   );

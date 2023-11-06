@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setCategory1Id,getC1 ,setC2Arr,setCategory2Id,setC3Arr,setCategory3Id} from '../../store/category/categorySlice';
 import { getAttrOneList,getAttrTwoList,getAttrThreeList } from '../../api/product/category';
 
-export default function Category() {
+export default function Category({scene}) {
     const { Option } = Select;
     const categoryStore = useSelector(state=>state.category)
     const dispatch = useDispatch()
@@ -25,6 +25,10 @@ export default function Category() {
     },[])
     // 分类一选择
     const c1changeHandler = async (id)=>{
+        dispatch(setCategory2Id(''))
+        dispatch(setCategory3Id(''))
+        dispatch(setC2Arr([]))
+        dispatch(setC3Arr([]))
         // console.log(value)
         dispatch(setCategory1Id(id))//将一级id保存到仓库
         // 根据一级id获取二级分类的数据
@@ -58,7 +62,7 @@ export default function Category() {
                 <Form layout="inline" size='large' style={{ display: 'flex', gap: '20px' }}>
 
                     <Form.Item label='一级分类'>
-                        <Select style={{ width: '200px' }} onChange={c1changeHandler} > 
+                        <Select style={{ width: '200px' }} onChange={c1changeHandler} disabled={scene?true:false}> 
 
                             {categoryStore.c1Arr?.map(item=>{
                                 return <Option value={item.id} key={item.id}>{item.name}</Option>
@@ -66,14 +70,14 @@ export default function Category() {
                         </Select>
                     </Form.Item>
                     <Form.Item label='二级分类'>
-                        <Select style={{ width: '200px' }} onChange={c2changeHandler} disabled={categoryStore.category1Id?false:true}>
+                        <Select style={{ width: '200px' }} onChange={c2changeHandler} disabled={categoryStore.category1Id&&!scene?false:true}>
                             {categoryStore.c2Arr.map(item=>{   
                                     return <Option value={item.id} key={item.id}>{item.name}</Option>
                             })}
                         </Select>
                     </Form.Item>
                     <Form.Item label='三级分类'>
-                        <Select style={{ width: '200px' }} onChange={c3changeHandler}  disabled={categoryStore.category2Id?false:true}>
+                        <Select style={{ width: '200px' }} onChange={c3changeHandler}  disabled={categoryStore.category2Id&&!scene?false:true}>
                         {categoryStore.c3Arr.map(item=>{   
                                     return <Option value={item.id} key={item.id}>{item.name}</Option>
                             })}

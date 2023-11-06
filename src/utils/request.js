@@ -2,7 +2,7 @@ import axios from "axios";
 
 const request = axios.create({
     baseURL:process.env.REACT_APP_BASE_API,
-    timeout:8000,
+    timeout:15000,
 
 })
 //添加请求拦截器
