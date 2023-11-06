@@ -75,6 +75,54 @@ export default function Brand() {
           />
         </div>
       </Card>
+                  {/* 对话框组件
+            <Modal
+                width={800}
+                style={{}}
+                title="添加属性"
+                centered
+                open={modalOpen}
+                onOk={() => setModalOpen(false)}
+                onCancel={() => setModalOpen(false)}
+            >
+                <Form style={{ minHeight: '200px', marginTop: '50px' }} size='large'>
+                    <FormItem label="品牌名称" >
+                        <Input placeholder='请输入品牌名称' style={{ width: '200px' }} />
+                    </FormItem>
+                    <FormItem label="品牌图片" >
+                        <Upload
+                            name="avatar"
+                            listType="picture-card"
+                            className="avatar-uploader"
+                            showUploadList={false}
+                            action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
+                            beforeUpload={beforeUpload}
+                            onChange={handleChange}
+                        >
+                            {imageUrl ? (
+                                <img
+                                    src={imageUrl}
+                                    alt="avatar"
+                                    style={{
+                                        width: '100%',
+                                    }}
+                                />
+                            ) : (
+                                <div>
+                                {loading ? <LoadingOutlined /> : <PlusOutlined />}
+                                <div
+                                  style={{
+                                    marginTop: 8,
+                                  }}
+                                >
+                                  Upload
+                                </div>
+                              </div>
+                            )}
+                        </Upload>
+                    </FormItem>
+                </Form>
+            </Modal> */}
     </div>
   )
 }

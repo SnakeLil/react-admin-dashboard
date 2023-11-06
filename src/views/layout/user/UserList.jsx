@@ -4,8 +4,10 @@ import { Popconfirm, Card, Col, Table, Row, message, Pagination } from 'antd'
 import { Button, Form, Input } from 'antd';
 import { SearchOutlined, SwapOutlined } from '@ant-design/icons'
 import './userList.scss'
+import MySpin from '../../../components/spin/MySpin';
 export default function UserList() {
   const [messageApi, contextHolder] = message.useMessage();
+  const [spinning, setSpinning] = useState(false)
   const columns = [
     {
       title: 'id',
@@ -56,13 +58,6 @@ export default function UserList() {
   const [filter,setFilter] = useState('')
   const [userList, setUserList] = useState([])
   // 分页器
-  const [tableParams, setTableParams] = useState(
-    {
-      current: 1,
-      pageSize: 5,
-      total: 0,
-    },
-  );
   const pagination = useRef({
     current: 1,
     pageSize: 5,
@@ -71,7 +66,7 @@ export default function UserList() {
 
   // 获取用户列表请求
   const handleGetAllUser = async (filter) => {
-
+    setSpinning(true)
     // let res = await getAllUser( tableParams.current, tableParams.pageSize, '')
     let res = await getAllUser( pagination.current.current, pagination.current.pageSize, filter? filter : '')
     if (res.code === 200) {
@@ -82,22 +77,14 @@ export default function UserList() {
         }
       }))
       pagination.current.total = res.data.total
-      // setTableParams(pre => {
-      //   return {
-      //     ...pre,
-      //     total: res.data.total,
-      //     current: res.data.current,
-      //     pageSize: res.data.size
-
-      //   }
-      // })
-      // console.log(tableParams)
+      setSpinning(false)
     } else {
       messageApi.open({
         type: 'error',
         content: '服务器异常',
       });
     }
+    setSpinning(false)
   }
   useEffect(() => {
     handleGetAllUser()
@@ -116,7 +103,6 @@ export default function UserList() {
     // setTableParams(pre => { return { ...pre, current: page, pageSize: pageSize } })
     pagination.current.current=page
     pagination.current.pageSize=pageSize
-    console.log(pagination)
     handleGetAllUser()
   }
   // 点击搜索
@@ -166,7 +152,7 @@ export default function UserList() {
           />
         </div>
 
-
+        <MySpin spinning={spinning}/>
       </Card>
     </div>
   )
