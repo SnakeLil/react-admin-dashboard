@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setCategory1Id,getC1 ,setC2Arr,setCategory2Id,setC3Arr,setCategory3Id} from '../../store/category/categorySlice';
 import { getAttrOneList,getAttrTwoList,getAttrThreeList } from '../../api/product/category';
 
-export default function Category({scene}) {
+export default function Category({scene,view}) {
     const { Option } = Select;
     const categoryStore = useSelector(state=>state.category)
     const dispatch = useDispatch()
@@ -70,7 +70,7 @@ export default function Category({scene}) {
                         </Select>
                     </Form.Item>
                     <Form.Item label='二级分类'>
-                        <Select style={{ width: '200px' }} onChange={c2changeHandler} disabled={categoryStore.category1Id&&!scene?false:true}>
+                        <Select style={{ width: '200px' }} onChange={c2changeHandler} disabled={(categoryStore.category1Id&&!scene)?false:true}>
                             {categoryStore.c2Arr.map(item=>{   
                                     return <Option value={item.id} key={item.id}>{item.name}</Option>
                             })}

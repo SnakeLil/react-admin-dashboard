@@ -12,6 +12,7 @@ export default function Spu() {
   const [spinning,setSpinning] = useState(false)
   const categoryStore = useSelector(state=>state.category)
   const [sence,setSence ] = useState(0)
+  const [spuData,setSpuData ]  = useState({})
   const columns = [
     {
       title: '序号',
@@ -67,7 +68,9 @@ export default function Spu() {
     let res = await getSpuList(pagination.current.current,pagination.current.pageSize,categoryStore.category3Id)
     if(res.code ===200) {
       setSpinning(false)
-      setSpuList(res.data.records)
+      setSpuList(res.data.records.map(item=>{
+        return {...item,key:item.id}
+      }))
       pagination.current.total = res.data.total
     }else {
       setSpinning(false)
@@ -110,6 +113,7 @@ export default function Spu() {
   }
   // 点击添加spu
   const handleClickAddSpu = ()=>{
+    setSpuData([])
     setSence(1)
   }
   // 点击添加sku
@@ -119,15 +123,18 @@ export default function Spu() {
   // 点击修改spu按钮
   const handleClickModifySpu = (record)=>{
     setSence(1)
+    console.log(record)
+    setSpuData(record)
+
   }
   return (
     <div>
-      <Category/>
+      {sence===0?<Category view={sence}/>:null}
 
       {/* spu列表 */}
       {sence === 0?
       <Card style={{ width: '100 %',marginTop:'30px' }}>
-        <Button icon={<PlusOutlined />} onClick={handleClickAddSpu}>添加SPU</Button>
+        <Button icon={<PlusOutlined />} onClick={handleClickAddSpu} disabled={!categoryStore.category3Id}>添加SPU</Button>
         <div style={{ width: '100%', marginTop: '30px' }}>
 
           <Table columns={columns} dataSource={spuList} bordered pagination={false} />
@@ -147,7 +154,7 @@ export default function Spu() {
       </Card>
       :sence === 1?
       // {/* 添加/修改spu组件 */}
-      <SpuForm setSence={setSence}/>
+      <SpuForm setSence={setSence} spu={spuData} getAllSpu={getAllSpu}/>
       :sence === 2?
       // {/* 添加sku组件 */}
       <SkuForm/>
