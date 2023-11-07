@@ -1,14 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react'
 import './brand.scss'
-import { Card, Button, message, Table, Pagination, Form, Upload, Modal, Input ,Popconfirm} from 'antd';
-import { LoadingOutlined, PlusOutlined, EditOutlined, DeleteOutlined,QuestionCircleOutlined } from '@ant-design/icons'
-import { TrandemarkList, AddOrUpdateTrademark, deleteTrandemark, uploadFile ,} from '../../../../api/product/brand';
+import { Card, Button, message, Table, Pagination, Form, Upload, Modal, Input, Popconfirm } from 'antd';
+import { LoadingOutlined, PlusOutlined, EditOutlined, QuestionCircleOutlined } from '@ant-design/icons'
+import { TrandemarkList, AddOrUpdateTrademark, deleteTrandemark, uploadFile, } from '../../../../api/product/brand';
 import MySpin from '../../../../components/spin/MySpin';
+import { useDispatch } from 'react-redux';
 export default function Brand() {
   const [spinning, setSpinning] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);// 对话框
   const [loading, setLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
+  const [modalspinning, setModalspinning]  = useState(false);
   const [brand, setBrand] = useState(
     {//品牌对象
 
@@ -96,6 +98,7 @@ export default function Brand() {
   }
   // 组件挂载时获取数据
   useEffect(() => {
+
     getAllBrand()
   }, [])
 
@@ -117,6 +120,7 @@ export default function Brand() {
   // 点击添加品牌按钮
   const handleAddBrand = () => {
     setBrand({ id: '', tmName: '', logoUrl: '', })
+    setPreviewImage('')
     setModalOpen(true)
   }
   // 文件上传
@@ -125,24 +129,36 @@ export default function Brand() {
       message.info('上传的图片格式只能是jpeg/png/jpg/gif/webp')
       return false
     }
+    if(file.size > 1024 * 1024 * 3) {
+      message.info('上传的图片大小不能超过3M')
+      return false
+    }
     // console.log(file)
 
   }
   const handleChange = async (file) => {
-    // 实现图片预览
+    setModalspinning(true)
+    const formData = new FormData();
+    formData.append('file', file.file.originFileObj);
     if (!file.file.url && !file.file.preview) {
       file.file.preview = await getBase64(file.file.originFileObj);
     }
-    setPreviewImage(file.file.url || file.file.preview);//用base64设置图片路径，展示预览图片
-    console.log(file)
-    // 
-    // 图片请求返回201失败，问题尚未解决，拿不到图片的logoUrl
-    // 图片请求返回201失败，问题尚未解决，拿不到图片的logoUrl
-    // 图片请求返回201失败，问题尚未解决，拿不到图片的logoUrl
-    // 
-    if (file.file?.response?.code === 200) {
-      setBrand(pre => ({ ...brand, imgUrl: file.file.response.data }))
+    // 发请求
+    if (file.file.status === 'done') {
+      
+      let res = await uploadFile(formData)
+      if (res.data.code === 200) {
+        setModalspinning(false)
+        // 实现图片预览
+        setPreviewImage(file.file.url || file.file.preview);//用base64设置图片路径，展示预览图片
+        setBrand(pre => ({ ...pre, logoUrl: res.data.data }))
+        message.success('上传成功')
+      } else {
+        setModalspinning(false)
+        message.info('上传失败')
+      }
     }
+
   }
   // 转base64
   const getBase64 = (file) =>
@@ -154,7 +170,6 @@ export default function Brand() {
     });
   // 点击修改品牌按钮
   const handleModifyBrand = (record) => {
-    console.log(record)
     setBrand({ id: '', tmName: '', logoUrl: '', })
     setModalOpen(true)
     setBrand(pre => ({ ...pre, id: record.id, tmName: record.tmName, logoUrl: record.logoUrl, }))
@@ -169,6 +184,7 @@ export default function Brand() {
         message.success(brand.id ? '修改成功' : '添加成功')
         setModalOpen(false)
         setBrand({ id: '', tmName: '', logoUrl: '', })
+        getAllBrand()
       } else {
         setModalOpen(false)
         setBrand({ id: '', tmName: '', logoUrl: '', })
@@ -237,7 +253,7 @@ export default function Brand() {
               listType="picture-card"
               className="avatar-uploader"
               showUploadList={false}
-              action='http://sph-api.atguigu.cn/admin/product/fileUpload'
+              action='http://8.134.64.19:5173/api/admin/product/fileUpload'
               // {async(file)=>{
               //   // console.log(file)
               //   let res = await uploadFile(file)
@@ -271,8 +287,8 @@ export default function Brand() {
             </Upload>
           </Form.Item>
         </Form>
+        <MySpin fullscreen={false} spinning={modalspinning}/>
       </Modal>
-
       <MySpin spinning={spinning} />
     </div>
   )

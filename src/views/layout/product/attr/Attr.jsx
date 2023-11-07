@@ -2,10 +2,12 @@ import React, { useState,  useEffect } from 'react'
 import './attr.scss'
 import { Card, Button, message, Table,  Form,  Tag,Input,  Popconfirm } from 'antd';
 import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Category from '../../../../components/category/Category';
 import { getAttrInfoList, deleteAttr, addOrUpdateAttr } from '../../../../api/product/category';
 import MySpin from '../../../../components/spin/MySpin';
+import { setCategory2Id ,setCategory3Id,getC1,setC2Arr,setC3Arr,setCategory1Id} from '../../../../store/category/categorySlice';
+
 export default function Attr() {
     const [scene, setScene] = useState(false)
     // 属性列表
@@ -122,6 +124,7 @@ export default function Attr() {
     const [attrValueList, setAttrValueList] = useState([]) //属性值列表
     const categoryStore = useSelector(state => state.category) //获取分类仓库
     const [spinning, setSpinning] = useState(false)
+    const dispatch = useDispatch()
     const [attr, setAttr] = useState({
         id: '',
         attrName: '',
@@ -151,9 +154,19 @@ export default function Attr() {
 
     }
     useEffect(() => {
+        // dispatch(setCategory1Id(''))
+        // dispatch(setCategory2Id(''))
+        // dispatch(setCategory3Id(''))
+        // dispatch(getC1([]))
+        // dispatch(setC2Arr([]))
+        // dispatch(setC3Arr([]))
+        // setAttrValueList([])
         if (categoryStore.category3Id) {
             getAttrList()
         }
+        // return ()=>{
+
+        // }
     }, [categoryStore.category3Id])
 
     // 点击添加属性

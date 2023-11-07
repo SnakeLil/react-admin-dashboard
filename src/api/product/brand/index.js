@@ -1,5 +1,6 @@
 // 统一管里项目用户相关的接口
 
+import axios from 'axios';
 import request from '../../../utils/request'
 
 //枚举请求地址，（定义常量）
@@ -33,5 +34,5 @@ export const deleteTrandemark = (id)=>{
 }
 // 上传文件
 export const uploadFile = (file)=>{
-    return request.post(API.UPLOAD_FILE,file);
+    return axios.post('http://8.134.64.19:5173/api/admin/product/fileUpload',file);
 }
