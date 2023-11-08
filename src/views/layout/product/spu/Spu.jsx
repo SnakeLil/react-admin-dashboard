@@ -2,7 +2,7 @@ import React ,{useEffect, useRef,useState}from 'react'
 import Category from '../../../../components/category/Category'
 import { Card, Button, message, Table, Pagination, Form, Upload, Modal, Input, Popconfirm } from 'antd';
 import {DeleteOutlined, EyeOutlined, PlusOutlined, EditOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { getSpuList ,deleteSpu} from '../../../../api/product/spu';
+import { getSpuList ,deleteSpu,getSkuListBySpu} from '../../../../api/product/spu';
 import { useDispatch, useSelector } from 'react-redux';
 import MySpin from '../../../../components/spin/MySpin';
 import SpuForm from '../../../../components/spu/SpuForm';
@@ -15,7 +15,9 @@ export default function Spu() {
   const categoryStore = useSelector(state=>state.category)
   const [sence,setSence ] = useState(0)
   const [spuData,setSpuData ]  = useState({})
+  const [skuList,setSkuList] = useState([])//spu的sku列表数据
   const dispatch = useDispatch()
+  const [modalOpen,setModalOpen] = useState(false)
   const columns = [
     {
       title: '序号',
@@ -50,7 +52,7 @@ export default function Spu() {
         <div style={{ width: '100%', height: '100%', display: 'flex', gap: '20px', justifyContent: 'center', alignItems: 'center' }}>
           <Button icon={<PlusOutlined />} title='添加sku' onClick={()=>{handleClickAddSku(record)}}>添加</Button>
           <Button icon={<EditOutlined />} title='修改spu' onClick={()=>{handleClickModifySpu(record)}}>修改</Button>
-          <Button icon={<EyeOutlined />} title='查看sku列表'>查看</Button>
+          <Button icon={<EyeOutlined />} title='查看sku列表' onClick={()=>{handleLookSku(record)}}>查看</Button>
           <Popconfirm
             description={`确定删除吗?`}
             okText="确认"
@@ -64,6 +66,62 @@ export default function Spu() {
       ),
     },
   ];
+  const skuColumns = [
+    {
+      title: '序号',
+      dataIndex: 'id',
+      key: 'id',
+      align: 'center',
+      width: 50,
+
+    },
+    {
+      title: '名称',
+      dataIndex: 'skuName',
+      key: 'skuName',
+      align: 'center',
+      ellipsis: true,
+      width: 150,
+    },
+    {
+      title: '描述',
+      dataIndex: 'skuDesc',
+      key: 'skuDesc',
+      align: 'center',
+      ellipsis: true,
+      width: 150,
+    },
+    {
+      title: '价格',
+      dataIndex: 'price',
+      key: 'price',
+      align: 'center',
+      
+      width: 60,
+    },
+    {
+      title: '重量',
+      dataIndex: 'weight',
+      key: 'weight',
+      align: 'center',
+      
+      width: 60,
+    },
+    {
+      title: '图片',
+      dataIndex: 'skuDefaultImg',
+      key: 'skuDefaultImg',
+      align: 'center',
+      width: 200,
+      render:(value,record)=>{
+        return (
+          <div style={{display:'flex',justifyContent:'center'}}>
+            <img src={value} alt="" style={{width:'60px',height:'60px'}}/>
+          </div>
+        )
+      }
+    },
+  ]
   
   // 获取spu列表的请求
   const getAllSpu = async()=>{
@@ -138,6 +196,18 @@ export default function Spu() {
     setSpuData(record)
 
   }
+  // 点击查看sku列表
+  const handleLookSku = async(record)=>{
+    setModalOpen(true)
+    let res = await getSkuListBySpu(record.id)
+    console.log(res)
+    if(res.code === 200) {
+      setSkuList(res.data)
+    }else {
+      message.error(res.message)
+    }
+  }
+  // 
   return (
     <div>
       {/* {sence===0?<Category view={sence}/>:null} */}
@@ -171,6 +241,24 @@ export default function Spu() {
       <SkuForm spu={spuData} setSence={setSence} />
       :null}
       <MySpin spinning={spinning} />
+
+      {/* 对话框组件，显示查看某个spu的sku列表 */}
+
+      <Modal
+        title="SKU列表"
+        footer={null}
+        centered
+        maskClosable
+        keyboard
+        onCancel={()=>{setModalOpen(false)}}
+        open={modalOpen}
+        width='1000'
+        style={{minHeight:'600px'}}
+        >
+          <Card style={{width:'1000px',minHeight:'600px'}}>
+        <Table columns={skuColumns} dataSource={skuList} bordered pagination={false}/>
+        </Card>
+      </Modal>
     </div>
   )
 }

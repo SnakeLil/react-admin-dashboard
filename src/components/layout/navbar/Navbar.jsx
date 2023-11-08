@@ -49,9 +49,10 @@ export default function Navbar({user,logout:reqLogout}) {
     }
     return routePath.map((item,index)=>{//循环，返回面包屑
       return <BreadcrumbItem key={index}>
-      <BreadcrumbLink  style={{ fontSize: '14px' }}>
+      <BreadcrumbLink href={pathname(index)}  style={{ fontSize: '14px' }}>
         {/* {item} */}
-        <Link to={pathname(index)}>{router[item]?.name}</Link>
+        {router[item]?.name}
+        {/* <Link to={pathname(index)}>{router[item]?.name}</Link> */}
         </BreadcrumbLink>
     </BreadcrumbItem>
     })
