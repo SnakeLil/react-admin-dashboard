@@ -37,12 +37,21 @@ export const categorySlice = createSlice({
     // 存c3Id
     setCategory3Id:(state,action)=>{
       state.category3Id=action.payload
+    },
+    // 清空仓库
+    clearCategory:  (state) =>  {
+      state.c1Arr = []
+      state.c2Arr = []
+      state.c3Arr = []
+      state.category1Id = ''
+      state.category2Id = ''
+      state.category3Id = ''
     }
 
 
   }
 })
 
-export const { setCategory1Id, getC1, setC2Arr,setCategory2Id ,setC3Arr,setCategory3Id} = categorySlice.actions
+export const { setCategory1Id, getC1, setC2Arr,setCategory2Id ,setC3Arr,setCategory3Id,clearCategory} = categorySlice.actions
 
 export default categorySlice.reducer

@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Category from '../../../../components/category/Category';
 import { getAttrInfoList, deleteAttr, addOrUpdateAttr } from '../../../../api/product/category';
 import MySpin from '../../../../components/spin/MySpin';
-import { setCategory2Id ,setCategory3Id,getC1,setC2Arr,setC3Arr,setCategory1Id} from '../../../../store/category/categorySlice';
+import { setCategory2Id ,setCategory3Id,getC1,setC2Arr,setC3Arr,setCategory1Id, clearCategory} from '../../../../store/category/categorySlice';
 
 export default function Attr() {
     const [scene, setScene] = useState(false)
@@ -154,13 +154,6 @@ export default function Attr() {
 
     }
     useEffect(() => {
-        // dispatch(setCategory1Id(''))
-        // dispatch(setCategory2Id(''))
-        // dispatch(setCategory3Id(''))
-        // dispatch(getC1([]))
-        // dispatch(setC2Arr([]))
-        // dispatch(setC3Arr([]))
-        // setAttrValueList([])
         if (categoryStore.category3Id) {
             getAttrList()
         }
@@ -168,6 +161,12 @@ export default function Attr() {
 
         // }
     }, [categoryStore.category3Id])
+
+    useEffect(()=>{ //组件第一次渲染时清空仓库中的分类数据，以及属性列表
+        dispatch( clearCategory())
+        setAttrValueList([])
+        setAttrList((pre)=>[])
+    },[])
 
     // 点击添加属性
     const addAttrHandler = () => {
@@ -273,6 +272,8 @@ export default function Attr() {
         })
         setScene(pre => !pre) 
     }
+   
+    
     return (
         <div className='attr'>
             {/* 三级分类 */}

@@ -163,6 +163,10 @@ export default function SpuForm({ setSence, spu,getAllSpu }) {
             setSaleAttrList(pre => allSaleAttr.filter(item => {
                 return spuSaleAttrList.every(item1 => item1.baseSaleAttrId !== item.id)
             }))
+        }else {
+            setSaleAttrList(pre => allSaleAttr.filter(item => {
+                return spuSaleAttrList?.every(item1 => item1.baseSaleAttrId !== item.id)
+            }))
         }
     }, [spuSaleAttrList, spu.id, flag])
     // 图片集change事件

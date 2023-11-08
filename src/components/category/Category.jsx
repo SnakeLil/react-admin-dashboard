@@ -77,7 +77,8 @@ export default function Category({scene,view}) {
                         </Select>
                     </Form.Item>
                     <Form.Item label='三级分类'>
-                        <Select style={{ width: '200px' }} onChange={c3changeHandler}  disabled={categoryStore.category2Id&&!scene?false:true}>
+                        <Select style={{ width: '200px' }} onChange={c3changeHandler}  
+                        disabled={categoryStore.category2Id&&!scene&&(view?view===0:true)?false:true}>
                         {categoryStore.c3Arr.map(item=>{   
                                     return <Option value={item.id} key={item.id}>{item.name}</Option>
                             })}

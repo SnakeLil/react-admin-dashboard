@@ -3,16 +3,19 @@ import Category from '../../../../components/category/Category'
 import { Card, Button, message, Table, Pagination, Form, Upload, Modal, Input, Popconfirm } from 'antd';
 import {DeleteOutlined, EyeOutlined, PlusOutlined, EditOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import { getSpuList ,deleteSpu} from '../../../../api/product/spu';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import MySpin from '../../../../components/spin/MySpin';
 import SpuForm from '../../../../components/spu/SpuForm';
 import SkuForm from '../../../../components/spu/SkuForm';
+import {  clearCategory} from '../../../../store/category/categorySlice';
+
 export default function Spu() {
   const [spuList, setSpuList] = useState([])
   const [spinning,setSpinning] = useState(false)
   const categoryStore = useSelector(state=>state.category)
   const [sence,setSence ] = useState(0)
   const [spuData,setSpuData ]  = useState({})
+  const dispatch = useDispatch()
   const columns = [
     {
       title: '序号',
@@ -95,12 +98,19 @@ export default function Spu() {
     pagination.current.pageSize = pageSize
     getAllSpu()
   }
-
+  useEffect(()=>{ //组件渲染时清空仓库分类数据
+    dispatch(clearCategory())
+    setSence(0)
+    setSpuList((pre)=>[])
+  },[])
+  
   useEffect(()=>{
     if(categoryStore.category3Id) {
       getAllSpu()
     }
   },[categoryStore.category3Id])
+
+
   // 点击确定删除spu
   const confirmDelSpu = async(record) =>{
     let res = await deleteSpu(record.id)
@@ -119,6 +129,7 @@ export default function Spu() {
   // 点击添加sku
   const handleClickAddSku = (record)=>{
     setSence(2)
+    setSpuData(record)
   }
   // 点击修改spu按钮
   const handleClickModifySpu = (record)=>{
@@ -129,8 +140,8 @@ export default function Spu() {
   }
   return (
     <div>
-      {sence===0?<Category view={sence}/>:null}
-
+      {/* {sence===0?<Category view={sence}/>:null} */}
+      <Category view={sence}/>
       {/* spu列表 */}
       {sence === 0?
       <Card style={{ width: '100 %',marginTop:'30px' }}>
@@ -157,9 +168,9 @@ export default function Spu() {
       <SpuForm setSence={setSence} spu={spuData} getAllSpu={getAllSpu}/>
       :sence === 2?
       // {/* 添加sku组件 */}
-      <SkuForm/>
+      <SkuForm spu={spuData} setSence={setSence} />
       :null}
-      <MySpin spinning={spinning}/>
+      <MySpin spinning={spinning} />
     </div>
   )
 }

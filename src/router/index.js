@@ -5,6 +5,7 @@ import {
     Route,
     Link,
     Routes,
+    Navigate ,
   } from "react-router-dom";
 import Layout from '../views/layout/Layout';
 import Login from '../views/login/Login';
@@ -37,6 +38,7 @@ export const router = createBrowserRouter([
           path: "/user",
           name:'用户管理',
           icon:BiUser,
+
           children:[
             {
               name:'用户列表',
@@ -50,6 +52,7 @@ export const router = createBrowserRouter([
           path: "/role",
           name:'角色管理',
           icon:BiUserPin,
+          // element:<Navigate to="/role/roleList" />,
           children:[
             {
               name:'角色列表',
@@ -69,6 +72,8 @@ export const router = createBrowserRouter([
           path:'/product',
           name:'商品管理',
           icon:ProfileOutlined,
+          // element:<Navigate to="/product/attr"/>,
+
           children:[
             {
               name:'属性管理',
