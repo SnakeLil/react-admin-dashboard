@@ -5,7 +5,7 @@ import { uploadFile } from '../../api/product/brand';
 import { useSelector } from 'react-redux';
 import { getAllTrademarkList, getAllSaleAttrList, getSpuSaleList, getSpuImageList, addOrUpdateSpu } from '../../api/product/spu';
 import MySpin from '../spin/MySpin';
-export default function SpuForm({ setSence, spu,getAllSpu }) {
+export default function SpuForm({ setSence, spu, getAllSpu }) {
     const [spinning, setSpinning] = useState(false)
     const { Option } = Select;
     const { TextArea } = Input;
@@ -66,7 +66,7 @@ export default function SpuForm({ setSence, spu,getAllSpu }) {
             render: (value, record, index) => {
                 return <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center' }}>
                     {value?.map(item => {
-                        return item.flag ? <Input onBlur={() => { onTagBlur(item, value) }} onChange={(e) => { onTagInputChange(e, item, value) }} autoFocus value={item.saleAttrValueName} style={{ width: '50px', height: '23px' }} />
+                        return item.flag ? <Input key={item.id} onBlur={() => { onTagBlur(item, value) }} onChange={(e) => { onTagInputChange(e, item, value) }} autoFocus value={item.saleAttrValueName} style={{ width: '50px', height: '23px' }} />
                             :
                             <Tag closable={true} onClose={(e) => { onTagClose(item) }} key={item.id}>{item.saleAttrValueName}</Tag>
                     })}
@@ -121,7 +121,6 @@ export default function SpuForm({ setSence, spu,getAllSpu }) {
     const getSpuSaleAttrList = async () => {
         let res = await getSpuSaleList(spu.id)
         if (res.code === 200) {
-            console.log(res)
             setSpuSaleAttrList(res.data.map(item => {
                 return { ...item, key: item.id }
             }))
@@ -163,7 +162,7 @@ export default function SpuForm({ setSence, spu,getAllSpu }) {
             setSaleAttrList(pre => allSaleAttr.filter(item => {
                 return spuSaleAttrList.every(item1 => item1.baseSaleAttrId !== item.id)
             }))
-        }else {
+        } else {
             setSaleAttrList(pre => allSaleAttr.filter(item => {
                 return spuSaleAttrList?.every(item1 => item1.baseSaleAttrId !== item.id)
             }))
@@ -171,26 +170,29 @@ export default function SpuForm({ setSence, spu,getAllSpu }) {
     }, [spuSaleAttrList, spu.id, flag])
     // 图片集change事件
     const handleChange = async (file) => {
-        if(file.file.status === 'removed') {
-            setFileList(pre=>(pre.filter(item=>item.id !== file.file.id)))
+        if (file.file.status === 'removed') {
+            setFileList(pre => (pre.filter(item => item.id !== file.file.id)))
             return
-        }else {
+        } else {
             const formData = new FormData();
             formData.append('file', file.file.originFileObj);
             if (!file.file.url && !file.file.preview) {
                 file.file.preview = await getBase64(file.file.originFileObj);
             }
-            console.log(file)
-            // 发请求
-            let res = await uploadFile(formData)
-            // console.log(res)
-            if (res.data.code === 200) {
-                // 实现图片预览
-                setPreviewImage(file.file.url || file.file.preview);//用base64设置图片路径，展示预览图片
-                message.success('上传成功')
-                setFileList(pre => [...pre, { imgUrl: res.data.data, imgName: file.file.name, spuId: spu.id, url: res.data.data }])
-            } else {
-                message.info('上传失败')
+            try{
+                // 发请求
+                let res = await uploadFile(formData)
+                // console.log(res)
+                if (res.data.code === 200) {
+                    // 实现图片预览
+                    setPreviewImage(file.file.url || file.file.preview);//用base64设置图片路径，展示预览图片
+                    message.success('上传成功')
+                    setFileList(pre => [...pre, { imgUrl: res.data.data, imgName: file.file.name, spuId: spu.id, url: res.data.data }])
+                } else {
+                    message.info('上传失败')
+                }
+            }catch (err) {
+                message.error(err.message)
             }
         }
 
@@ -226,7 +228,6 @@ export default function SpuForm({ setSence, spu,getAllSpu }) {
     }
     // 销售属性选择 change事件
     const onSaleAttrChange = (id) => {
-        console.log(id)
         setSaleAttr(id)
     }
     // 点击添加属性按钮
@@ -243,7 +244,6 @@ export default function SpuForm({ setSence, spu,getAllSpu }) {
     // 标签删除事件
     const onTagClose = (value) => {
         // e.preventDefault()
-        console.log(value)
         setSpuSaleAttrList(pre => pre.map(item => {
             if (item.baseSaleAttrId === value.baseSaleAttrId) {
                 item.spuSaleAttrValueList = item.spuSaleAttrValueList.filter(item1 => {
@@ -259,7 +259,6 @@ export default function SpuForm({ setSence, spu,getAllSpu }) {
     }
     // 点击添加销售属性值的按钮
     const handleAddSaleAttrValue = (value, record) => {
-        console.log(record)
         setSpuSaleAttrList(pre => pre.map(item => {
             if (item?.baseSaleAttrId === record?.baseSaleAttrId) {
                 item.spuSaleAttrValueList.push({
@@ -275,7 +274,6 @@ export default function SpuForm({ setSence, spu,getAllSpu }) {
     }
     // 添加标签的输入框change事件
     const onTagInputChange = (e, titem, value) => {
-        console.log(value)
         setSpuSaleAttrList(pre => pre.map(item => {
             if (item.baseSaleAttrId === value[0].baseSaleAttrId) {
                 item.spuSaleAttrValueList.map(item1 => {
@@ -291,7 +289,6 @@ export default function SpuForm({ setSence, spu,getAllSpu }) {
         }))
     }
     const onTagBlur = (titem, value) => {
-        console.log(titem)
         setSpuSaleAttrList(pre => pre.map(item => {
             if (item.baseSaleAttrId === value[0].baseSaleAttrId) {
                 item.spuSaleAttrValueList.map(item1 => {
@@ -308,7 +305,6 @@ export default function SpuForm({ setSence, spu,getAllSpu }) {
     }
     // 点击删除销售属性
     const handleClickDelSaleAttr = (value) => {
-        console.log(value)
         setSpuSaleAttrList(pre => pre.filter(item => item.baseSaleAttrId !== value.baseSaleAttrId))
         setFlag(pre => !pre)
     }
@@ -328,8 +324,8 @@ export default function SpuForm({ setSence, spu,getAllSpu }) {
     //   点击保存按钮，收集数据发送请求
     const save = async () => {
         setSpinning(true)
-        setSpuData(pre=>({...pre,spuImageList:fileList,spuSaleAttrList:spuSaleAttrList}))
-        spuInfo.current = {...spuData,spuImageList:fileList,spuSaleAttrList:spuSaleAttrList}
+        setSpuData(pre => ({ ...pre, spuImageList: fileList, spuSaleAttrList: spuSaleAttrList }))
+        spuInfo.current = { ...spuData, spuImageList: fileList, spuSaleAttrList: spuSaleAttrList }
         // 为什么修改后为空？，两个列表合并时状态没有同步？
         try {
             let res = await addOrUpdateSpu(spuInfo.current)
@@ -337,11 +333,11 @@ export default function SpuForm({ setSence, spu,getAllSpu }) {
                 setSence(0)
                 getAllSpu()
                 setSpinning(false)
-                message.success(spu.id?'修改成功':'添加成功')
+                message.success(spu.id ? '修改成功' : '添加成功')
                 setSpuData({ id: '', spuName: '', tmId: '', description: '', category3Id: '', spuImageList: [], spuSaleAttrList: [] })
                 setSpuSaleAttrList([])
                 setFileList([])
-                spuInfo.current = { id: '', spuName: '', tmId: '', description: '', category3Id: '', spuImageList: [], spuSaleAttrList: []}
+                spuInfo.current = { id: '', spuName: '', tmId: '', description: '', category3Id: '', spuImageList: [], spuSaleAttrList: [] }
             } else {
                 setSpinning(false)
                 message.error(res.message)
@@ -375,11 +371,11 @@ export default function SpuForm({ setSence, spu,getAllSpu }) {
                         // onPreview={handlePreview}
                         beforeUpload={beforeUpload}
                         onChange={handleChange}
-                        // onRemove  ={(file) => { handleRemove(file)}
+                    // onRemove  ={(file) => { handleRemove(file)}
                     >
                         <PlusOutlined />
                     </Upload>
-                    <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={() => { console.log(1)}}>
+                    <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={() => { console.log(1) }}>
                         <img
                             alt="img"
                             style={{

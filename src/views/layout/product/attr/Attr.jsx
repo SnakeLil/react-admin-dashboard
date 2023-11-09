@@ -236,7 +236,6 @@ export default function Attr() {
     }
     // 属性值失去焦点
     const inputOnBlur = (value)=>{
-        console.log(value)
         if(value.valueName.trim().length === 0) {
             // 没有输入属性值，删除此行
             setAttrValueList(pre=>pre.filter(item=>item.key!==value.key))

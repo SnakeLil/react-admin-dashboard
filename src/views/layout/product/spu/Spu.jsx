@@ -192,7 +192,6 @@ export default function Spu() {
   // 点击修改spu按钮
   const handleClickModifySpu = (record)=>{
     setSence(1)
-    console.log(record)
     setSpuData(record)
 
   }
@@ -200,14 +199,12 @@ export default function Spu() {
   const handleLookSku = async(record)=>{
     setModalOpen(true)
     let res = await getSkuListBySpu(record.id)
-    console.log(res)
     if(res.code === 200) {
       setSkuList(res.data)
     }else {
       message.error(res.message)
     }
   }
-  // 
   return (
     <div>
       {/* {sence===0?<Category view={sence}/>:null} */}

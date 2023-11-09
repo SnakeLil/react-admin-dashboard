@@ -55,6 +55,10 @@
             height: calc(100vh - 80px);
            
             overflow: auto;
+
+            .MainContent {
+                min-height: calc(100vh - 120px);
+            }
         }
 
 

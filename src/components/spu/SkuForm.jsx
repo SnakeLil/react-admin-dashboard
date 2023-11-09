@@ -181,7 +181,6 @@ export default function SkuForm({ setSence, spu }) {
   }
   // 点击设为默认图片
   const handleSetDefaultImg = (record) => {
-    console.log(record)
     setSkuImgUrl(record.imgUrl)
   }
   return (

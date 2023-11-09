@@ -4,6 +4,7 @@ import Navbar from '../../components/layout/navbar/Navbar'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import './layout.scss'
 import { getUserInfo,logout } from '../../api/user'
+import { Watermark } from 'antd';
 import { useDispatch } from 'react-redux'
 import { userInfo } from '../../store/user/userSlice'
 export default function Layout() {
@@ -58,7 +59,12 @@ export default function Layout() {
           <Navbar user={user} logout={logout}/>
         </div>
         <div className="layout-content">
+          <Watermark content="Lilsnake">
+          <div className='MainContent'>
+
           <Outlet />
+          </div>
+          </Watermark>
         </div>
       </div>
 
