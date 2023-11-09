@@ -133,10 +133,14 @@ export default function UserList() {
     setOpen(true)
     let res = await getAllRoles(record.id)
     if(res.code === 200){
+      // 我
+      // 在
+      // 这
+      // 里
       console.log(res)
       setAllRolesList(res.data.allRolesList)
       setAssignRolesList(res.data.assignRoles)
-      
+
 
     }else{
       message.error(res.msg)
