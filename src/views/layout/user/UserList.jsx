@@ -1,13 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { getAllUser } from '../../../api/acl/index'
-import { Popconfirm, Card, Col, Table, Row, message, Pagination } from 'antd'
-import { Button, Form, Input } from 'antd';
-import { SearchOutlined, SwapOutlined } from '@ant-design/icons'
+import { getAllUser ,getAllRoles} from '../../../api/acl/user/index'
+import { Popconfirm, Card, Col, Table, Row, message, Pagination, Drawer ,Button, Form, Input,Checkbox} from 'antd'
+
+import { SearchOutlined,RedditOutlined, EditOutlined,SwapOutlined ,DeleteOutlined} from '@ant-design/icons'
 import './userList.scss'
 import MySpin from '../../../components/spin/MySpin';
 export default function UserList() {
   const [messageApi, contextHolder] = message.useMessage();
   const [spinning, setSpinning] = useState(false)
+  const [open, setOpen] = useState(false);
+  const [allRolesList,setAllRolesList] = useState([])//所有角色列表数组
+  const [assignRolesList,setAssignRolesList] = useState([])
+
   const columns = [
     {
       title: 'id',
@@ -47,12 +51,26 @@ export default function UserList() {
       key: 'action',
       render: (_, record) => (
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-          <Button>分配权限</Button>
-          <Button>编辑</Button>
-          <Button>删除</Button>
+          <Button icon={<RedditOutlined />} onClick={()=>{handleClickAsignRoles(record)}}>分配角色</Button>
+          <Button icon={<EditOutlined />}>编辑</Button>
+          <Button icon={<DeleteOutlined />}>删除</Button>
 
         </div>
       ),
+    },
+  ];
+  const options = [
+    {
+      label: 'Apple',
+      value: 'Apple',
+    },
+    {
+      label: 'Pear',
+      value: 'Pear',
+    },
+    {
+      label: 'Orange',
+      value: 'Orange',
     },
   ];
   const [filter,setFilter] = useState('')
@@ -109,6 +127,34 @@ export default function UserList() {
   const searchHandler = ()=>{
     handleGetAllUser(filter)
   }
+  // 点击分配角色
+  const handleClickAsignRoles =async (record)=>{
+    console.log(record)
+    setOpen(true)
+    let res = await getAllRoles(record.id)
+    if(res.code === 200){
+      console.log(res)
+      setAllRolesList(res.data.allRolesList)
+      setAssignRolesList(res.data.assignRoles)
+      
+
+    }else{
+      message.error(res.msg)
+    }
+  }
+    // 抽屉close
+    const onClose = () => {
+      setOpen(false);
+    };
+
+    // 角色分配checkBox cahnge事件
+    const checkOnChange = (e)=>{
+
+    }
+    // 角色分配check全选cahnge事件
+    const onAllCheckChange = (e)=>{
+
+    }
   return (
     <div className='userList'>
       <Card style={{ display: 'flex', flexDirection: 'row' }}>
@@ -153,6 +199,36 @@ export default function UserList() {
         </div>
 
         <MySpin spinning={spinning}/>
+        <Drawer
+        title={'分配角色'}
+        placement="right"
+        width={680}
+        onClose={onClose}
+        open={open}
+        closable={false}
+        footer={
+          <div style={{width:'100%',height:'60px',display:'flex',justifyContent:'center',alignItems:'center',gap:'50px'}}>
+            <Button onClick={onClose}>Cancel</Button>
+            <Button onClick={onClose} type="primary">
+              Submit
+            </Button>
+          </div>
+        }
+      >
+        <Form layout='vertical' size='large'>
+          <Form.Item label="用户名">
+          <Input disabled  placeholder='请输入用户名' style={{width:'300px'}}/>
+        </Form.Item>
+        <Form.Item label="角色列表">
+        <Checkbox onChange={(e)=>{onAllCheckChange(e)}}>全选</Checkbox>
+        <br/>
+        <br/>
+        <Checkbox.Group options={options} defaultValue={['Apple']} onChange={(e)=>{checkOnChange(e)}} />
+        </Form.Item>
+        </Form>
+        
+        
+      </Drawer>
       </Card>
     </div>
   )
