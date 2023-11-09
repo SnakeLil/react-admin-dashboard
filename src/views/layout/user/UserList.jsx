@@ -1,17 +1,29 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { getAllUser ,getAllRoles} from '../../../api/acl/user/index'
-import { Popconfirm, Card, Col, Table, Row, message, Pagination, Drawer ,Button, Form, Input,Checkbox} from 'antd'
+import { getAllUser, getAllRoles, assignRoles, deleteUser ,addOrUpdateUser} from '../../../api/acl/user/index'
+import { Modal, Popconfirm, Card, Col, Table, Row, message, Pagination, Drawer, Button, Form, Input, Checkbox } from 'antd'
 
-import { SearchOutlined,RedditOutlined, EditOutlined,SwapOutlined ,DeleteOutlined} from '@ant-design/icons'
+import { PlusCircleOutlined, QuestionCircleOutlined, SearchOutlined, RedditOutlined, EditOutlined, SwapOutlined, DeleteOutlined } from '@ant-design/icons'
 import './userList.scss'
 import MySpin from '../../../components/spin/MySpin';
 export default function UserList() {
+  const [modalOpen, setModalOpen] = useState(false)
   const [messageApi, contextHolder] = message.useMessage();
   const [spinning, setSpinning] = useState(false)
   const [open, setOpen] = useState(false);
-  const [allRolesList,setAllRolesList] = useState([])//所有角色列表数组
-  const [assignRolesList,setAssignRolesList] = useState([])
-
+  const [allRolesList, setAllRolesList] = useState([])//所有角色列表数组
+  const [assignRolesList, setAssignRolesList] = useState([])
+  const [username, setUsername] = useState('')
+  const [user, setUser] = useState({
+    id: '',
+    username: '',
+    password: '',
+    name: '',
+    phone:'',
+  })
+  const userRole = useRef({
+    roleIdList: [],
+    userId: '',
+  })
   const columns = [
     {
       title: 'id',
@@ -47,33 +59,28 @@ export default function UserList() {
     },
 
     {
-      title: 'Action',
+      title: '操作',
       key: 'action',
       render: (_, record) => (
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-          <Button icon={<RedditOutlined />} onClick={()=>{handleClickAsignRoles(record)}}>分配角色</Button>
-          <Button icon={<EditOutlined />}>编辑</Button>
-          <Button icon={<DeleteOutlined />}>删除</Button>
+          <Button icon={<RedditOutlined />} onClick={() => { handleClickAsignRoles(record) }}>分配角色</Button>
+          <Button icon={<EditOutlined />} onClick={()=>{handleClickEditUser(record)}}>编辑</Button>
+          <Popconfirm
+            description={`确定删除该用户吗?`}
+            okText="确认"
+            cancelText="取消"
+            placement="left"
+            icon={<QuestionCircleOutlined style={{ color: 'gray' }} />}
+            onConfirm={() => { confirmDeluser(record) }}>
+            <Button icon={<DeleteOutlined />}>删除</Button>
+          </Popconfirm>
 
         </div>
       ),
     },
   ];
-  const options = [
-    {
-      label: 'Apple',
-      value: 'Apple',
-    },
-    {
-      label: 'Pear',
-      value: 'Pear',
-    },
-    {
-      label: 'Orange',
-      value: 'Orange',
-    },
-  ];
-  const [filter,setFilter] = useState('')
+
+  const [filter, setFilter] = useState('')
   const [userList, setUserList] = useState([])
   // 分页器
   const pagination = useRef({
@@ -86,7 +93,7 @@ export default function UserList() {
   const handleGetAllUser = async (filter) => {
     setSpinning(true)
     // let res = await getAllUser( tableParams.current, tableParams.pageSize, '')
-    let res = await getAllUser( pagination.current.current, pagination.current.pageSize, filter? filter : '')
+    let res = await getAllUser(pagination.current.current, pagination.current.pageSize, filter ? filter : '')
     if (res.code === 200) {
       setUserList(res.data.records.map(item => {
         return {
@@ -111,60 +118,116 @@ export default function UserList() {
   // 分页器每页条数变化
   const onShowSizeChange = (current, size) => {
     // setTableParams(pre => { return { ...pre, pageSize: size, current: current } })
-    pagination.current.current=current
-    pagination.current.pageSize=size
+    pagination.current.current = current
+    pagination.current.pageSize = size
     handleGetAllUser()
   }
   // 分页器页码变化事件
   const onChange = (page, pageSize) => {
     console.log(page)
     // setTableParams(pre => { return { ...pre, current: page, pageSize: pageSize } })
-    pagination.current.current=page
-    pagination.current.pageSize=pageSize
+    pagination.current.current = page
+    pagination.current.pageSize = pageSize
     handleGetAllUser()
   }
   // 点击搜索
-  const searchHandler = ()=>{
+  const searchHandler = () => {
     handleGetAllUser(filter)
   }
   // 点击分配角色
-  const handleClickAsignRoles =async (record)=>{
-    console.log(record)
+  const handleClickAsignRoles = async (record) => {
+    setUsername(record.username)
+    userRole.current.userId = record.id
     setOpen(true)
     let res = await getAllRoles(record.id)
-    if(res.code === 200){
-      // 我
-      // 在
-      // 这
-      // 里
-      console.log(res)
-      setAllRolesList(res.data.allRolesList)
-      setAssignRolesList(res.data.assignRoles)
+    if (res.code === 200) {
+      setAllRolesList(res.data.allRolesList.map(item => { //设置所有角色多选选项
+        return { key: item.id, value: item.id, label: item.roleName, }
+      }))
+      setAssignRolesList(res.data.assignRoles.map(item => {  //选中的角色列表【id，id】
+        return item.id
+      }))
 
 
-    }else{
+    } else {
       message.error(res.msg)
     }
   }
-    // 抽屉close
-    const onClose = () => {
-      setOpen(false);
-    };
+  // 抽屉close
+  const onClose = () => {
+    setOpen(false);
+  };
 
-    // 角色分配checkBox cahnge事件
-    const checkOnChange = (e)=>{
-
+  // 角色分配checkBox cahnge事件
+  const checkOnChange = (e) => {
+    setAssignRolesList(e)
+  }
+  // 角色分配check全选cahnge事件
+  const onAllCheckChange = (e) => {
+    if (e.target.checked) {
+      setAssignRolesList(allRolesList.map(item => item.value))
+    } else {
+      setAssignRolesList([])
     }
-    // 角色分配check全选cahnge事件
-    const onAllCheckChange = (e)=>{
 
+  }
+  // 点击保存
+  const save = async () => {
+    userRole.current.roleIdList = assignRolesList
+    let res = await assignRoles(userRole.current)
+    if (res.code === 200) {
+      message.success('分配成功')
+      setOpen(false)
+      handleGetAllUser()
+    } else {
+      message.error(res.message)
     }
+  }
+  // 点击确定删除用户
+  const confirmDeluser = async (record) => {
+    let res = await deleteUser(record.id)
+    if (res.code === 200) {
+      message.success('删除成功')
+      handleGetAllUser()
+    } else {
+      message.error(res.message)
+    }
+  }
+  // 点金添加用户按钮
+  const handleClickAddUser = () => {
+    setUser({id: '',username: '',password: '',name: '',phone:'',})
+    setModalOpen(true)
+  }
+  // 点击编辑用户
+  const handleClickEditUser = (record)=>{
+    setUser({id: '',username: '',password: '',name: '',phone:'',})
+    setModalOpen(true)
+    setUser(pre=>({...pre,
+      id:record.id,
+      username:record.username,
+      name:record.name,
+      // password:record.password,
+      phone:record.phone
+    }))
+  }
+  // 点击确认修改/添加用户
+  const handleAddOrUpdateUser = async()=>{
+    let res = await addOrUpdateUser(user)
+    if (res.code === 200) {
+      message.success('保存成功')
+      setModalOpen(false)
+      handleGetAllUser()
+    } else {
+      message.error(res.message)
+    }
+  }
   return (
     <div className='userList'>
       <Card style={{ display: 'flex', flexDirection: 'row' }}>
         <Row style={{ marginTop: '20px' }}>
           <Col >
             <Form
+            
               name="basic"
               style={{
                 maxWidth: 300,
@@ -172,13 +235,14 @@ export default function UserList() {
               autoComplete="off"
             >
               <Form.Item label="用户名" name="username">
-                <Input placeholder='请输入用户名' value={filter} onChange={(e)=>setFilter(e.target.value)}/>
+                <Input placeholder='请输入用户名' value={filter} onChange={(e) => setFilter(e.target.value)} />
               </Form.Item>
             </Form>
           </Col>
           <Col >
             <Button style={{ marginLeft: '30px' }} icon={<SearchOutlined />} onClick={searchHandler}>查询</Button>
-            <Button style={{ marginLeft: '10px' }} icon={<SwapOutlined />} onClick={()=>{handleGetAllUser('')}}>重置</Button>
+            <Button style={{ marginLeft: '10px' }} icon={<SwapOutlined />} onClick={() => { handleGetAllUser('') }}>重置</Button>
+            <Button style={{ marginLeft: '130px' }} icon={<PlusCircleOutlined />} onClick={handleClickAddUser}>添加用户</Button>
           </Col>
         </Row>
         {/* 表格 */}
@@ -202,37 +266,82 @@ export default function UserList() {
           />
         </div>
 
-        <MySpin spinning={spinning}/>
+        <MySpin spinning={spinning} />
         <Drawer
-        title={'分配角色'}
-        placement="right"
-        width={680}
-        onClose={onClose}
-        open={open}
-        closable={false}
-        footer={
-          <div style={{width:'100%',height:'60px',display:'flex',justifyContent:'center',alignItems:'center',gap:'50px'}}>
-            <Button onClick={onClose}>Cancel</Button>
-            <Button onClick={onClose} type="primary">
-              Submit
-            </Button>
-          </div>
-        }
-      >
-        <Form layout='vertical' size='large'>
-          <Form.Item label="用户名">
-          <Input disabled  placeholder='请输入用户名' style={{width:'300px'}}/>
-        </Form.Item>
-        <Form.Item label="角色列表">
-        <Checkbox onChange={(e)=>{onAllCheckChange(e)}}>全选</Checkbox>
-        <br/>
-        <br/>
-        <Checkbox.Group options={options} defaultValue={['Apple']} onChange={(e)=>{checkOnChange(e)}} />
-        </Form.Item>
-        </Form>
-        
-        
-      </Drawer>
+          title={'分配角色'}
+          placement="right"
+          width={680}
+          onClose={onClose}
+          open={open}
+          closable={false}
+          footer={
+            <div style={{ width: '100%', height: '60px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '50px' }}>
+              <Button onClick={onClose}>取消</Button>
+              <Button onClick={save} type="primary">
+                保存
+              </Button>
+            </div>
+          }
+        >
+          <Form layout='vertical' size='large'>
+            <Form.Item label="用户名">
+              <Input disabled value={username} placeholder='请输入用户名' style={{ width: '300px' }} />
+            </Form.Item>
+            <Form.Item label="角色列表">
+              <Checkbox onChange={(e) => { onAllCheckChange(e) }} checked={assignRolesList.length === allRolesList.length} >全选</Checkbox>
+              <br />
+              <br />
+              <Checkbox.Group options={allRolesList} value={assignRolesList} onChange={(e) => { checkOnChange(e) }} />
+            </Form.Item>
+          </Form>
+
+
+        </Drawer>
+        {/* 添加/修改用户对话框 */}
+        <Modal
+          title={user.id?'修改用户':"添加用户"}
+          footer={
+            <div style={{ width: '100%', height: '60px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '50px' }}>
+              <Button onClick={() => { setModalOpen(false) }}>取消</Button>
+              <Button 
+              disabled={user.id? !(user.name.trim().length&&user.username.trim().length&&user.phone.trim().length)
+                :
+                !(user.name.trim().length&&user.username.trim().length&&user.password.trim().length&&user.phone.trim().length)} 
+              onClick={handleAddOrUpdateUser} type="primary">
+                保存
+              </Button>
+            </div>
+          }
+          centered
+          maskClosable
+          keyboard
+          onCancel={() => { setModalOpen(false) }}
+          open={modalOpen}
+          width='1000'
+          style={{ minHeight: '600px' }}
+        >
+          <Card style={{ width: '500px', minHeight: '450px' }}>
+            <Form size='large' layout='vertical'>
+              <Form.Item label="用户名" >
+                <Input placeholder='请输入用户名' value={user.username} 
+                onChange={(e)=>{setUser(pre=>({...pre,username:e.target.value}))}} 
+                style={{ width: '300px' }} />
+              </Form.Item>
+              <Form.Item label="姓名" >
+                <Input placeholder='请输入姓名' value={user.name}  style={{ width: '300px' }} 
+                onChange={(e)=>{setUser(pre=>({...pre,name:e.target.value}))}} />
+              </Form.Item>
+              <Form.Item label="电话" >
+                <Input placeholder='请输入电话号码' value={user.phone}  style={{ width: '300px' }} 
+                onChange={(e)=>{setUser(pre=>({...pre,phone:e.target.value}))}} />
+              </Form.Item>
+              <Form.Item label="密码">
+                <Input placeholder='请输入密码' value={user.password} disabled={user.id} style={{ width: '300px' }} 
+                onChange={(e)=>{setUser(pre=>({...pre,password:e.target.value}))}}/>
+              </Form.Item>
+            </Form>
+          </Card>
+        </Modal>
       </Card>
     </div>
   )
