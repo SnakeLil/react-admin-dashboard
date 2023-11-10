@@ -1,3 +1,20 @@
+# 项目介绍
+## 项目使用到的技术栈
+
+CSS：sass，Flex布局
+项目路由使用: react-router来管理
+使用styled-components+普通的css编写样式
+使用axios发送网络请求
+项目全面拥抱React Hooks
+项目组件库使用: ant design
+使用redux对项目中state进行管理
+
+
+
+（项目中待的优化: 函数式组件采用memo、路由懒加载、函数防抖）
+
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
